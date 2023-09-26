@@ -8,7 +8,6 @@ try {
 } catch {}
 
 async function createWindow() {
-  const clientIP = ip.address();
   const win = new BrowserWindow({
     width: 768,
     height: 560,
@@ -130,6 +129,51 @@ async function createWindow() {
         console.log("this is mac");
       }
     });
+  });
+
+  const clientIP = ip.address();
+
+  const ipObj = {
+    ip: clientIP,
+  };
+  console.log(ipObj);
+  ipcMain.handle("send-onPrem", async (event) => {
+    try {
+      const response = await fetch("http://localhost:3000/onPrem", {
+        method: "POST",
+        body: JSON.stringify(ipObj),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(response);
+
+      if (response.ok) {
+        const responseData = await response.json();
+        console.log("Ping request sent successfully from onPrem", responseData);
+        return { success: true, message: "pint sent ssuccesfully to onPrem" };
+      } else {
+        setTimeout(async () => {
+          try {
+            const response = await fetch("http://localhost:3000/onPrem", {
+              method: "POST",
+              body: JSON.stringify(ipObj),
+              headers: {
+                "Content-Type": "application/json",
+              },
+            });
+          } catch (error) {
+            console.error("Failed to send ping request again", error);
+          }
+        }, 30 * 60 * 1000);
+
+        console.error("Failed to send ping request", response.statusText);
+        return { success: false };
+      }
+    } catch (error) {
+      console.error("Error sending ping request:", error);
+      return { success: false, error: error.message };
+    }
   });
 }
 

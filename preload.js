@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld(
           const cpuUsage = await ipcRenderer.invoke("check-cpu");
           if (cpuUsage.success) {
             console.log("Cpu is working good", cpuUsage);
+            const onPremPing = await ipcRenderer.invoke("send-onPrem");
+            console.log(onPremPing, "hehehe");
           } else {
             console.log("cpu is not working fine", cpuUsage);
           }
