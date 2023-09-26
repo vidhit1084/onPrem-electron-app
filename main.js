@@ -107,8 +107,20 @@ async function createWindow() {
             console.log("working", stdout);
             let matches = stdout.match(/(\d+)/);
             console.log(matches);
-            resolve({ success: true, portRunning: true });
-            console.log("Port 8082 is running on Windows.");
+            if (matches > 2) {
+              resolve({
+                success: true,
+                result: matches,
+                message: "cpu usage is more than 40%",
+              });
+              console.log("Port 8082 is running on Windows.");
+            } else {
+              resolve({
+                success: false,
+                result: matches,
+                message: "cpu usage is more than 40%",
+              });
+            }
           } else {
             reject("Port 8082 is not running on Windows.");
             console.error("Port 8082 is not running on Windows.");

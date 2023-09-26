@@ -15,6 +15,12 @@ contextBridge.exposeInMainWorld(
         const portCheck = await ipcRenderer.invoke("check-port");
         if (portCheck) {
           console.log("port 8082 is running fine", portCheck);
+          const cpuUsage = await ipcRenderer.invoke("check-cpu");
+          if (cpuUsage.success) {
+            console.log("Cpu is working good", cpuUsage);
+          } else {
+            console.log("cpu is not working fine", cpuUsage);
+          }
         } else {
           console.log("port 8082 is not running", portCheck);
         }
