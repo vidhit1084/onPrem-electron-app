@@ -139,7 +139,7 @@ async function createWindow() {
   console.log(ipObj);
   ipcMain.handle("send-onPrem", async (event) => {
     try {
-      const response = await fetch("http://localhost:3000/onPrem", {
+      const response = await fetch("https://api.metadome.ai/heartbeat-dev/on-prem", {
         method: "POST",
         body: JSON.stringify(ipObj),
         headers: {
@@ -150,12 +150,12 @@ async function createWindow() {
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log("Ping request sent successfully from onPrem", responseData);
-        return { success: true, message: "pint sent ssuccesfully to onPrem" };
+        console.log("Ping request sent successfully from on-prem", responseData);
+        return { success: true, message: "pint sent ssuccesfully to on-prem" };
       } else {
         setTimeout(async () => {
           try {
-            const response = await fetch("http://localhost:3000/onPrem", {
+            const response = await fetch("https://api.metadome.ai/heartbeat-dev/on-prem", {
               method: "POST",
               body: JSON.stringify(ipObj),
               headers: {
