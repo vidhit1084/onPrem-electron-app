@@ -80,7 +80,7 @@ async function createWindow() {
         console.log("Checking on Windows...");
 
         exec(`netstat -a -n -o | find "8082"`, (error, stdout) => {
-          if (!error && stdout.toLowerCase().includes("8082")) {
+          if (!error && stdout.includes("8082")) {
             resolve({ success: true, portRunning: true });
             console.log("Port 8082 is running on Windows.");
           } else {
@@ -106,7 +106,7 @@ async function createWindow() {
             console.log("working", stdout);
             let matches = stdout.match(/(\d+)/);
             console.log(matches);
-            if (parseInt(matches[0]) > 2) {
+            if (parseInt(matches[0]) > 40) {
               resolve({
                 success: true,
                 result: matches[0],
