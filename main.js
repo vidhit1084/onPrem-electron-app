@@ -43,7 +43,7 @@ async function createWindow() {
         exec(
           `tasklist /FI "IMAGENAME eq Docker Desktop.exe"`,
           (error, stdout) => {
-            if (!error && stdout.toLowerCase().includes("Docker")) {
+            if (!error && stdout.includes("Docker")) {
               resolve({ success: true, isRunning: true });
               console.log("Docker is running on Windows.");
             } else {
