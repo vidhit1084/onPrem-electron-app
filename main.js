@@ -19,6 +19,48 @@ async function createWindow() {
   });
   win.loadFile("src/index.html");
 
+  ipcMain.handle("retrieve-ip", async (event) => {
+    return new Promise((resolve, reject) => {
+      if (process.platform == "darwin" || process.platform == "linux") {
+        // try {
+        exec(
+          `ifconfig en0 | grep "inet " | awk '{print $2}'`,
+          (error, stdout) => {
+            const ipPattern = /\d+\.\d+\.\d+\.\d+/;
+            const match = stdout.match(ipPattern);
+            if (!error && match) {
+              resolve({ success: true, ip: match[0] });
+              console.log("Retrieved IP on mac");
+            } else {
+              reject("No IP found on mac.");
+              console.error("No IP found on mac.");
+            }
+          }
+        );
+      } else if (process.platform === "win32") {
+        console.log("Checking on Windows...");
+
+        exec(
+          `netsh interface ip show address "Ethernet" | findstr "IP Address"`,
+          (error, stdout) => {
+            const ipPattern = /\d+\.\d+\.\d+\.\d+/;
+            const match = stdout.match(ipPattern);
+            if (!error && match) {
+              resolve({ success: true, ip: match[0] });
+              console.log("Retrieved IP");
+            } else {
+              reject("No IP found.");
+              console.error("No IP found.");
+            }
+          }
+        );
+      } else {
+        console.log("Unsupported operating system.");
+        reject("Unsupported operating system.");
+      }
+    });
+  });
+
   ipcMain.handle("check-docker", async (event) => {
     return new Promise((resolve, reject) => {
       if (process.platform == "darwin" || process.platform == "linux") {
@@ -133,13 +175,10 @@ async function createWindow() {
 
   const clientIP = ip.address();
 
-  const ipObj = {
-    ip: clientIP,
-  };
-  console.log(ipObj);
-  ipcMain.handle("send-onPrem", async (event) => {
+
+  ipcMain.handle("send-onPrem", async (event, ipObj) => {
     try {
-      const response = await fetch("https://api.metadome.ai/heartbeat-dev/on-prem", {
+      const response = await fetch("http://localhost:3000/on-prem", {
         method: "POST",
         body: JSON.stringify(ipObj),
         headers: {
@@ -150,12 +189,15 @@ async function createWindow() {
 
       if (response.ok) {
         const responseData = await response.json();
-        console.log("Ping request sent successfully from on-prem", responseData);
+        console.log(
+          "Ping request sent successfully from on-prem",
+          responseData
+        );
         return { success: true, message: "pint sent ssuccesfully to on-prem" };
       } else {
         setTimeout(async () => {
           try {
-            const response = await fetch("https://api.metadome.ai/heartbeat-dev/on-prem", {
+            const response = await fetch("http://localhost:3000/on-prem", {
               method: "POST",
               body: JSON.stringify(ipObj),
               headers: {
