@@ -29,7 +29,7 @@ async function createWindow() {
             const ipPattern = /\d+\.\d+\.\d+\.\d+/;
             const match = stdout.match(ipPattern);
             if (!error && match) {
-              resolve({ success: true, ip: match[0] });
+              resolve(match[0]);
               console.log("Retrieved IP on mac");
             } else {
               reject("No IP found on mac.");
@@ -46,7 +46,7 @@ async function createWindow() {
             const ipPattern = /\d+\.\d+\.\d+\.\d+/;
             const match = stdout.match(ipPattern);
             if (!error && match) {
-              resolve({ success: true, ip: match[0] });
+              resolve(match[0]);
               console.log("Retrieved IP");
             } else {
               reject("No IP found.");
@@ -178,7 +178,7 @@ async function createWindow() {
 
   ipcMain.handle("send-onPrem", async (event, ipObj) => {
     try {
-      const response = await fetch("http://localhost:3000/on-prem", {
+      const response = await fetch("https://api.metadome.ai/heartbeat-dev/on-prem", {
         method: "POST",
         body: JSON.stringify(ipObj),
         headers: {
@@ -197,7 +197,7 @@ async function createWindow() {
       } else {
         setTimeout(async () => {
           try {
-            const response = await fetch("http://localhost:3000/on-prem", {
+            const response = await fetch("https://api.metadome.ai/heartbeat-dev/on-prem", {
               method: "POST",
               body: JSON.stringify(ipObj),
               headers: {
