@@ -141,18 +141,24 @@ async function createWindow() {
   ipcMain.handle("check-cpu", async (event) => {
     try {
       const cpuData = await si.currentLoad();
-      const cpuUsage = cpuData.currentLoad;
-      console.log(cpuUsage, "this is cpu %");
-      if (cpuUsage > 40) {
+      console.log(cpuData, "this is data");
+
+      // Sum up the CPU usage of all cores and threads
+      const totalCpuUsage = cpuData.cpus.reduce(
+        (acc, core) => acc + core.load,
+        0
+      );
+      console.log(totalCpuUsage);
+      if (totalCpuUsage > 40) {
         return {
           success: true,
-          result: cpuUsage.toFixed(2),
+          result: totalCpuUsage.toFixed(2),
           message: "CPU usage is more than 40%",
         };
       } else {
         return {
           success: false,
-          result: cpuUsage.toFixed(2),
+          result: totalCpuUsage.toFixed(2),
           message: "CPU usage is not more than 40%",
         };
       }
