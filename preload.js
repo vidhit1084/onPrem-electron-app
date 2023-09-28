@@ -18,19 +18,21 @@ contextBridge.exposeInMainWorld(
         const result = await ipcRenderer.invoke("check-docker");
         if (result) {
           console.log(result, "docker is running");
-          const portCheck = await ipcRenderer.invoke("check-port");
-          if (portCheck) {
-            console.log("port 8082 is running fine", portCheck);
+          const portCheck = await ipcRenderer.invoke("check-port", 8082);
+          const port2Check = await ipcRenderer.invoke("check-port", 8081);
+
+          if (portCheck && port2Check) {
+            console.log("port 8082 and 8081 are running fine", portCheck);
             const cpuUsage = await ipcRenderer.invoke("check-cpu");
             if (cpuUsage.success) {
               console.log("Cpu is working good", cpuUsage);
-            const onPremPing = await ipcRenderer.invoke("send-onPrem", ipObj);
-            if (onPremPing) {
-              const time = Date.now().toLocaleString();
-              console.log(onPremPing, "hehehe", time);
-            } else {
-              console.log("ping not sent ");
-            }
+              const onPremPing = await ipcRenderer.invoke("send-onPrem", ipObj);
+              if (onPremPing) {
+                const time = Date.now().toLocaleString();
+                console.log(onPremPing, "hehehe", time);
+              } else {
+                console.log("ping not sent ");
+              }
             } else {
               console.log("cpu is not working fine", cpuUsage);
             }

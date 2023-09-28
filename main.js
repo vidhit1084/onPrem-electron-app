@@ -100,17 +100,19 @@ async function createWindow() {
       }
     });
   });
-  ipcMain.handle("check-port", async (event) => {
+  ipcMain.handle("check-port", async (event, port) => {
     return new Promise((resolve, reject) => {
       if (process.platform == "darwin" || process.platform == "linux") {
         try {
-          exec(`lsof -i :8082`, (error, stdout) => {
+          exec(`lsof -i :${port}`, (error, stdout) => {
             if (!error && stdout) {
               resolve({ success: true, portRunning: true });
             } else {
               // resolve({ success: false, isRunning: false });
-              console.log("Port 8082 isn't running");
-              reject(new Error("Port 8082 is not running somehow", error));
+              console.log(`Port ${port} isn't running`);
+              reject(
+                new Error("Port 8081 or 8082 is not running somehow", error)
+              );
               resolve("Ignored");
               console.log("failed");
             }
@@ -121,13 +123,17 @@ async function createWindow() {
       } else if (process.platform === "win32") {
         console.log("Checking on Windows...");
 
-        exec(`netstat -a -n -o | find "8082"`, (error, stdout) => {
-          if (!error && stdout.includes("8082")) {
+        exec(`netstat -a -n -o | find "${port}"`, (error, stdout) => {
+          if (!error && stdout.includes(`${port}`)) {
             resolve({ success: true, portRunning: true });
-            console.log("Port 8082 is running on Windows.");
+            console.log(`Port ${port} isn't running`);
           } else {
-            reject("Port 8082 is not running on Windows.");
-            console.error("Port 8082 is not running on Windows.");
+            console.log(`Port ${port} isn't running`);
+            reject(
+              new Error("Port 8081 or 8082 is not running somehow", error)
+            );
+            resolve("Ignored");
+            console.log("failed");
           }
         });
       } else {
@@ -192,7 +198,7 @@ async function createWindow() {
           "Ping request sent successfully from on-prem",
           responseData
         );
-        return { success: true, message: "pint sent ssuccesfully to on-prem" };
+        return { success: true, message: "ping sent ssuccesfully to on-prem" };
       } else {
         setTimeout(async () => {
           try {
