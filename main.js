@@ -2,7 +2,7 @@ const { app, BrowserWindow, ipcMain, ipcRenderer } = require("electron");
 const { exec } = require("child_process");
 const path = require("path");
 const fetch = require("electron-fetch").default;
-const ip = require("ip");
+const si = require("systeminformation");
 try {
   require("electron-reloader")(module);
 } catch {}
@@ -139,52 +139,45 @@ async function createWindow() {
     //   netstat -a -n -o | find "8080"
   });
   ipcMain.handle("check-cpu", async (event) => {
-    return new Promise((resolve, reject) => {
-      if (process.platform === "win32") {
-        console.log("Checking on Windows...");
-
-        exec(`wmic cpu get loadpercentage`, (error, stdout) => {
-          if (!error && stdout) {
-            console.log("working", stdout);
-            let matches = stdout.match(/(\d+)/);
-            console.log(matches);
-            if (parseInt(matches[0]) > 40) {
-              resolve({
-                success: true,
-                result: matches[0],
-                message: "cpu usage is more than 40%",
-              });
-              console.log("Port 8082 is running on Windows.");
-            } else {
-              resolve({
-                success: false,
-                result: matches[0],
-                message: "cpu usage is more than 40%",
-              });
-            }
-          } else {
-            reject("Port 8082 is not running on Windows.");
-            console.error("Port 8082 is not running on Windows.");
-          }
-        });
+    try {
+      const cpuData = await si.currentLoad();
+      const cpuUsage = cpuData.currentLoad;
+      console.log(cpuUsage, "this is cpu %");
+      if (cpuUsage > 40) {
+        return {
+          success: true,
+          result: cpuUsage.toFixed(2),
+          message: "CPU usage is more than 40%",
+        };
       } else {
-        console.log("this is mac");
+        return {
+          success: false,
+          result: cpuUsage.toFixed(2),
+          message: "CPU usage is not more than 40%",
+        };
       }
-    });
+    } catch (error) {
+      console.error("Error fetching CPU usage:", error);
+      return {
+        success: false,
+        result: 0,
+        message: "Error fetching CPU usage",
+      };
+    }
   });
-
-  const clientIP = ip.address();
-
 
   ipcMain.handle("send-onPrem", async (event, ipObj) => {
     try {
-      const response = await fetch("https://api.metadome.ai/heartbeat-dev/on-prem", {
-        method: "POST",
-        body: JSON.stringify(ipObj),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        "https://api.metadome.ai/heartbeat-dev/on-prem",
+        {
+          method: "POST",
+          body: JSON.stringify(ipObj),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
       console.log(response);
 
       if (response.ok) {
@@ -197,13 +190,16 @@ async function createWindow() {
       } else {
         setTimeout(async () => {
           try {
-            const response = await fetch("https://api.metadome.ai/heartbeat-dev/on-prem", {
-              method: "POST",
-              body: JSON.stringify(ipObj),
-              headers: {
-                "Content-Type": "application/json",
-              },
-            });
+            const response = await fetch(
+              "https://api.metadome.ai/heartbeat-dev/on-prem",
+              {
+                method: "POST",
+                body: JSON.stringify(ipObj),
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
           } catch (error) {
             console.error("Failed to send ping request again", error);
           }
