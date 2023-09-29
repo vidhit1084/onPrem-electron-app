@@ -23,7 +23,7 @@ contextBridge.exposeInMainWorld(
 
           if (portCheck && port2Check) {
             console.log("port 8082 and 8081 are running fine", portCheck);
-            const cpuUsage = await ipcRenderer.invoke("check-cpu");
+            // const cpuUsage = await ipcRenderer.invoke("check-cpu");
             const gpuUsage = await ipcRenderer.invoke("check-gpu");
 
             // if (cpuUsage.success) {
