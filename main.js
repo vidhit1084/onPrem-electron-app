@@ -189,13 +189,14 @@ async function createWindow() {
             if (!error && stdout) {
               console.log(stdout, "this is gpu data");
               if (stdout.trim() > 40) {
+                resolve(stdout.trim());
                 return {
                   success: true,
                   result: stdout.trim(),
                   message: "GPU usage is more than 40%",
                 };
-              }
-              else{
+              } else {
+                resolve(stdout.trim());
                 return {
                   success: false,
                   result: stdout.trim(),

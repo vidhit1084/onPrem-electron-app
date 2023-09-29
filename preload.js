@@ -26,22 +26,25 @@ contextBridge.exposeInMainWorld(
             const cpuUsage = await ipcRenderer.invoke("check-cpu");
             const gpuUsage = await ipcRenderer.invoke("check-gpu");
 
-            if (cpuUsage.success && gpuUsage.success) {
-              console.log(
-                "Cpu and Gpu are working good",
-                cpuUsage,
-                ":",
-                gpuUsage
-              );
-              const onPremPing = await ipcRenderer.invoke("send-onPrem", ipObj);
-              if (onPremPing) {
-                const time = Date.now().toLocaleString();
-                console.log(onPremPing, "hehehe", time);
+            if (cpuUsage.success) {
+              console.log("Cpu is working good", cpuUsage);
+              if (gpuUsage > 40) {
+                console.log("Gpu is working fine", gpuUsage);
+                const onPremPing = await ipcRenderer.invoke(
+                  "send-onPrem",
+                  ipObj
+                );
+                if (onPremPing) {
+                  const time = Date.now().toLocaleString();
+                  console.log(onPremPing, "hehehe", time);
+                } else {
+                  console.log("ping not sent ");
+                }
               } else {
-                console.log("ping not sent ");
+                console.log("gpu is not working fine", gpuUsage);
               }
             } else {
-              console.log("cpu or gpu is not working fine", cpuUsage);
+              console.log("cpu is not working fine", cpuUsage);
             }
           } else {
             console.log("port 8082 or 8081 is not running", portCheck);
