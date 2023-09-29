@@ -146,39 +146,39 @@ async function createWindow() {
 
     //   netstat -a -n -o | find "8080"
   });
-  ipcMain.handle("check-cpu", async (event) => {
-    try {
-      const cpuData = await si.currentLoad();
-      console.log(cpuData, "this is data");
+  // ipcMain.handle("check-cpu", async (event) => {
+  //   try {
+  //     const cpuData = await si.currentLoad();
+  //     console.log(cpuData, "this is data");
 
-      // Sum up the CPU usage of all cores and threads
-      const totalCpuUsage = cpuData.cpus.reduce(
-        (acc, core) => acc + core.load,
-        0
-      );
-      console.log(totalCpuUsage);
-      if (totalCpuUsage > 40) {
-        return {
-          success: true,
-          result: totalCpuUsage.toFixed(2),
-          message: "CPU usage is more than 40%",
-        };
-      } else {
-        return {
-          success: false,
-          result: totalCpuUsage.toFixed(2),
-          message: "CPU usage is not more than 40%",
-        };
-      }
-    } catch (error) {
-      console.error("Error fetching CPU usage:", error);
-      return {
-        success: false,
-        result: 0,
-        message: "Error fetching CPU usage",
-      };
-    }
-  });
+  //     // Sum up the CPU usage of all cores and threads
+  //     const totalCpuUsage = cpuData.cpus.reduce(
+  //       (acc, core) => acc + core.load,
+  //       0
+  //     );
+  //     console.log(totalCpuUsage);
+  //     if (totalCpuUsage > 40) {
+  //       return {
+  //         success: true,
+  //         result: totalCpuUsage.toFixed(2),
+  //         message: "CPU usage is more than 40%",
+  //       };
+  //     } else {
+  //       return {
+  //         success: false,
+  //         result: totalCpuUsage.toFixed(2),
+  //         message: "CPU usage is not more than 40%",
+  //       };
+  //     }
+  //   } catch (error) {
+  //     console.error("Error fetching CPU usage:", error);
+  //     return {
+  //       success: false,
+  //       result: 0,
+  //       message: "Error fetching CPU usage",
+  //     };
+  //   }
+  // });
 
   ipcMain.handle("check-gpu", async (event) => {
     return new Promise((resolve, reject) => {
