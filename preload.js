@@ -24,8 +24,15 @@ contextBridge.exposeInMainWorld(
           if (portCheck && port2Check) {
             console.log("port 8082 and 8081 are running fine", portCheck);
             const cpuUsage = await ipcRenderer.invoke("check-cpu");
-            if (cpuUsage.success) {
-              console.log("Cpu is working good", cpuUsage);
+            const gpuUsage = await ipcRenderer.invoke("check-gpu");
+
+            if (cpuUsage.success && gpuUsage.success) {
+              console.log(
+                "Cpu and Gpu are working good",
+                cpuUsage,
+                ":",
+                gpuUsage
+              );
               const onPremPing = await ipcRenderer.invoke("send-onPrem", ipObj);
               if (onPremPing) {
                 const time = Date.now().toLocaleString();
@@ -34,10 +41,10 @@ contextBridge.exposeInMainWorld(
                 console.log("ping not sent ");
               }
             } else {
-              console.log("cpu is not working fine", cpuUsage);
+              console.log("cpu or gpu is not working fine", cpuUsage);
             }
           } else {
-            console.log("port 8082 is not running", portCheck);
+            console.log("port 8082 or 8081 is not running", portCheck);
           }
         } else {
           console.error("No app is running or port is not running");

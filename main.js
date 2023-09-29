@@ -3,6 +3,8 @@ const { exec } = require("child_process");
 const path = require("path");
 const fetch = require("electron-fetch").default;
 const si = require("systeminformation");
+const { rejects } = require("assert");
+const { stderr, stdout } = require("process");
 try {
   require("electron-reloader")(module);
 } catch {}
@@ -176,6 +178,38 @@ async function createWindow() {
         message: "Error fetching CPU usage",
       };
     }
+  });
+
+  ipcMain.handle("check-gpu", async (event) => {
+    return new Promise((resolve, reject) => {
+      if (process.platform == "win32") {
+        exec(
+          `nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits`,
+          (error, stdout) => {
+            if (!error && stdout) {
+              console.log(stdout, "this is gpu data");
+              if (stdout.trim() > 40) {
+                return {
+                  success: true,
+                  result: stdout.trim(),
+                  message: "GPU usage is more than 40%",
+                };
+              }
+              else{
+                return {
+                  success: false,
+                  result: stdout.trim(),
+                  message: "GPU usage is not more than 40%",
+                };
+              }
+            } else {
+              console.log("no GPU");
+              reject("No GPU Data");
+            }
+          }
+        );
+      }
+    });
   });
 
   ipcMain.handle("send-onPrem", async (event, ipObj) => {
